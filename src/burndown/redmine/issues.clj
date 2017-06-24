@@ -15,3 +15,16 @@
 (defn get-all-issues []
   (let [total-count (get-in (get-issues 1) [:body :total_count])]
     (get-in (get-issues total-count) [:body :issues])))
+
+(defn hours-by-done-ratio [issues ratio]
+  (->> (filter #(= ratio (:done_ratio %)) issues)
+       (map :estimated_hours)
+       (remove nil?)
+       (reduce +)))
+
+(defn get-times []
+  (let [issues (get-all-issues)]
+    {:total (reduce + (remove nil? (map :estimated_hours issues)))
+     :todo (hours-by-done-ratio issues 0)
+     :process (hours-by-done-ratio issues 30)
+     :done (hours-by-done-ratio issues 100)}))
